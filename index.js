@@ -77,22 +77,66 @@ async function run() {
 
     app.post("/postJob", async (req, res) => {
       const data = req.body;
+      // data.createdAt = new Date();
+      data.createdAt = new Date();
       const result = await jobCollection.insertOne(data);
 
       res.send(result);
       console.log("result", result);
     });
 
+    // app.get("/allJobs/:text", async (req, res) => {
+    //   console.log(req.params.text);
+    //   if (req.params.text === "remote" || req.params.text === "offline") {
+    //     const result = await jobCollection
+    //       .find({ status: req.params.text })
+    //       // .sort({ createdAt: -1 })
+    //       .sort({ createdAt: 1 })
+    //       .toArray();
+
+    //     return res.send(result);
+    //   }
+    //   const result = await jobCollection
+    //     .find({})
+    //     // .sort({ createdAt: -1 })
+    //     .sort({ createdAt: 1 })
+    //     .toArray();
+
+    //   res.send(result);
+    // });
+
+    app.post("/postJob", async (req, res) => {
+      // Get the document data from the request body
+      const data = req.body;
+      data.createdAt = new Date();
+      const result = await jobCollection.insertOne(data);
+      res.send(result);
+      console.log(result);
+    });
+
     app.get("/allJobs/:text", async (req, res) => {
-      console.log(req.params.text);
-      if (req.params.text === "remote" || req.params.text === "offline") {
+      if (req.params.text == "remote" || req.params.text == "offline") {
         const result = await jobCollection
           .find({ status: req.params.text })
+          .sort({ createdAt: -1 })
           .toArray();
         return res.send(result);
       }
-      const result = await jobCollection.find({}).toArray();
-      // console.log(result)
+
+      const result = await jobCollection
+        .find({})
+        .sort({ createdAt: -1 })
+        .toArray();
+      res.send(result);
+    });
+
+    app.get("/myJobs/:email", async (req, res) => {
+      console.log(req.params.email);
+      const result = await jobCollection
+        .find({ postedBy: req.params.email })
+
+        .toArray();
+
       res.send(result);
     });
 
