@@ -75,35 +75,43 @@ async function run() {
     const dbName = client.db("job-center");
     const jobCollection = dbName.collection("employments");
 
-    app.post("/postJob", async (req, res) => {
-      const data = req.body;
-      // data.createdAt = new Date();
-      data.createdAt = new Date();
-      const result = await jobCollection.insertOne(data);
+    // const indexKey = { title: 1, category: 1 };
+    // const indexOptions = { name: "titleCategory" };
 
-      res.send(result);
-      console.log("result", result);
-    });
+    // const result = jobCollection.createIndex(indexKey, indexOptions);
 
-    // app.get("/allJobs/:text", async (req, res) => {
-    //   console.log(req.params.text);
-    //   if (req.params.text === "remote" || req.params.text === "offline") {
-    //     const result = await jobCollection
-    //       .find({ status: req.params.text })
-    //       // .sort({ createdAt: -1 })
-    //       .sort({ createdAt: 1 })
-    //       .toArray();
+    // app.get("/searchTextTitleOrCategory/:text", async (req, res) => {
+    //   const searchText = req.params.text;
 
-    //     return res.send(result);
-    //   }
     //   const result = await jobCollection
-    //     .find({})
-    //     // .sort({ createdAt: -1 })
-    //     .sort({ createdAt: 1 })
+    //     .find({
+    //       $or: [
+    //         { title: { $regex: searchText, $options: "i" } },
+    //         { category: { $regex: searchText, $options: "i" } },
+    //       ],
+    //     })
     //     .toArray();
 
     //   res.send(result);
     // });
+
+    // creating index on two fields
+    const indexKeys = { title: 1, category: 1 };
+    const indexOptions = { name: "titleCategory" };
+    const result = await jobCollection.createIndex(indexKeys, indexOptions);
+
+    app.get("/searchTitleAndCategory/:text", async (req, res) => {
+      const searchText = req.params.text;
+      const result = await jobCollection
+        .find({
+          $or: [
+            { title: { $regex: searchText, $options: "i" } },
+            { category: { $regex: searchText, $options: "i" } },
+          ],
+        })
+        .toArray();
+      res.send(result);
+    });
 
     app.post("/postJob", async (req, res) => {
       // Get the document data from the request body
@@ -131,7 +139,6 @@ async function run() {
     });
 
     app.get("/myJobs/:email", async (req, res) => {
-      console.log(req.params.email);
       const result = await jobCollection
         .find({ postedBy: req.params.email })
 
