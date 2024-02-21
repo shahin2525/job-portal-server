@@ -52,7 +52,7 @@ app.use(express.json());
 const rakib = 12;
 //
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri =
   "mongodb+srv://job-center:0jWlzsEnQ9qZF3OD@cluster0.ax6qyiu.mongodb.net/?retryWrites=true&w=majority";
 
@@ -145,6 +145,24 @@ async function run() {
         .toArray();
 
       res.send(result);
+    });
+
+    app.put("/updateJob/:id", async (req, res) => {
+      const id = req.params.id;
+
+      const body = req.body;
+      console.log(id, body);
+      const filter = { _id: new ObjectId(id) };
+
+      const updateDoc = {
+        $set: {
+          title: body.title,
+          status: body.status,
+        },
+      };
+      const result = await jobCollection.updateOne(filter, updateDoc);
+      res.send(result);
+      console.log(result);
     });
 
     console.log(
